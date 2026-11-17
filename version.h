@@ -26,7 +26,7 @@
 #define VER_MAJOR       "1"
 #define VER_MINOR       "6"
 #define VER_REV         "1"
-#define VERSION_DATE    "20251011"
+#define VERSION_DATE    "20261116"
 
 #if defined(ZUMSPOT_ADF7021)
 #define BOARD_INFO      "ZUMspot"
@@ -71,7 +71,9 @@
 
 #define FW_VERSION      "v" VER_MAJOR "." VER_MINOR "." VER_REV " " VERSION_DATE
 
-#define DESCRIPTION     BOARD_INFO "-" FW_VERSION " " TCXO_FREQ "MHz " RF_DUAL RF_CHIP " FW by CA6JAU"
+// "(M17)" marks the M17 Project's build. It goes at the end: tools read the
+// board name before "-v", and the version, date and TCXO frequency after it.
+#define DESCRIPTION     BOARD_INFO "-" FW_VERSION " " TCXO_FREQ "MHz " RF_DUAL RF_CHIP " FW by CA6JAU (M17)"
 
 #if defined(MADEBYMAKEFILE)
 #include "GitVersion.h"
