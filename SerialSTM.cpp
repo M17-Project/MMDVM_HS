@@ -103,8 +103,12 @@ uint16_t RXSerialfifolevel1()
 // warning: this call is blocking
 void TXSerialFlush1()
 {
-  // wait until the TXE shows the shift register is empty
-  while (USART_GetITStatus(USART1, USART_FLAG_TXE))
+  // wait until the TX FIFO has drained
+  while (TXSerialfifolevel1() > 0U)
+    ;
+
+  // wait until the TC flag shows the shift register is empty
+  while (USART_GetFlagStatus(USART1, USART_FLAG_TC) == RESET)
     ;
 }
 
@@ -294,8 +298,12 @@ uint16_t RXSerialfifolevel2()
 // warning: this call is blocking
 void TXSerialFlush2()
 {
-  // wait until the TXE shows the shift register is empty
-  while (USART_GetITStatus(USART2, USART_FLAG_TXE))
+  // wait until the TX FIFO has drained
+  while (TXSerialfifolevel2() > 0U)
+    ;
+
+  // wait until the TC flag shows the shift register is empty
+  while (USART_GetFlagStatus(USART2, USART_FLAG_TC) == RESET)
     ;
 }
 
