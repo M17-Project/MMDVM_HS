@@ -1,0 +1,67 @@
+# Builds the firmware for every board in configs/ on each push, and on a
+# release tag (yyyy.mm.dd.rr) publishes the images, firmware.json (the
+# manifest Pi-Star upgrades from) and SHA256SUMS as a GitHub release.
+name: Firmware
+
+on:
+  push:
+    branches: [master]
+    tags: ['[0-9]+.[0-9]+.[0-9]+.[0-9]+']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    container: debian:bookworm-slim
+    steps:
+      - name: Install the toolchain
+        run: |
+          apt-get update -qq
+          DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends \
+            gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib \
+            make git jq binutils bsdextrautils ca-certificates
+          arm-none-eabi-gcc --version | head -1
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - name: Build every board
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          scripts/release_build.sh dist "${{ github.ref_type == 'tag' && github.ref_name || '' }}"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: firmware
+          path: dist/
+          if-no-files-found: error
+
+  release:
+    if: github.ref_type == 'tag'
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: firmware
+          path: dist
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          cd dist
+          sha256sum -c SHA256SUMS
+          desc=$(jq -r '.boards[0].description | sub(" GitID.*"; "")' firmware.json)
+          gitid=$(jq -r .gitid firmware.json)
+          gh release create "$TAG" -R "$GITHUB_REPOSITORY" --title "$TAG" \
+            --notes "MMDVM_HS firmware for every board in configs/, built from ${gitid} (${desc#*-}).
+
+          Each board reports \`GitID #${gitid}\` in its version string. firmware.json lists every image with its board, TCXO, duplex, host link, flash method and SHA-256; SHA256SUMS covers the images and the manifest." \
+            -- *_fw.bin firmware.json SHA256SUMS
