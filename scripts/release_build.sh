@@ -3,7 +3,12 @@
 # Builds the firmware for every board in boards.json and writes a release
 # manifest (firmware.json) and SHA256SUMS beside the images.
 #
-#   scripts/release_build.sh <output dir> [release name]
+#   scripts/release_build.sh <output dir> [release tag]
+#
+# A release tag is the firmware's version from version.h: vX.Y.Z for a
+# release, vX.Y.Z-<suffix> (-beta, -test, -rc1, ...) for a pre-release.
+# A tag that does not match version.h fails the build. Without a tag the
+# build is named vX.Y.Z-g<commit> (CI builds and local tests).
 #
 # Each config is built once, from the committed tree (HEAD) in a scratch
 # clone, so Config.h in the working tree is never touched and uncommitted
@@ -23,10 +28,29 @@ set -euo pipefail
 
 OUT=$(realpath -m "${1:?usage: $0 <output dir> [release name]}")
 SRC=$(cd "$(dirname "$0")/.." && pwd)
-RELEASE=${2:-$(git -C "$SRC" describe --tags --always)}
+TAG=${2:-}
 COMMIT=$(git -C "$SRC" rev-parse HEAD)
 SHORT=$(git -C "$SRC" rev-parse --short HEAD)
 MAP=$(git -C "$SRC" show "$COMMIT:boards.json")
+
+# The firmware version, as version.h has it
+ver() { git -C "$SRC" show "$COMMIT:version.h" | sed -nE "s/^#define[[:space:]]+$1[[:space:]]+\"([0-9]+)\".*/\1/p"; }
+VERSION="v$(ver VER_MAJOR).$(ver VER_MINOR).$(ver VER_REV)"
+if [[ ! $VERSION =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+	echo "version.h: cannot read the version (got $VERSION)" >&2
+	exit 1
+fi
+PRERELEASE=true
+if [ -n "$TAG" ]; then
+	if [[ ! $TAG =~ ^${VERSION//./\\.}(-[A-Za-z0-9][A-Za-z0-9.]*)?$ ]]; then
+		echo "Tag $TAG does not match the firmware version $VERSION (version.h): use $VERSION or $VERSION-<suffix>" >&2
+		exit 1
+	fi
+	[ "$TAG" = "$VERSION" ] && PRERELEASE=false
+	RELEASE=$TAG
+else
+	RELEASE="$VERSION-g$SHORT"
+fi
 
 if [ ! -d "$SRC/STM32F10X_Lib/CMSIS" ]; then
 	echo "STM32F10X_Lib is missing: git submodule update --init" >&2
@@ -129,12 +153,13 @@ if [ -n "$clash" ]; then
 	exit 1
 fi
 
-jq -n --arg release "$RELEASE" --arg commit "$COMMIT" --arg gitid "$SHORT" \
+jq -n --arg release "$RELEASE" --arg version "$VERSION" --argjson prerelease "$PRERELEASE" --arg commit "$COMMIT" --arg gitid "$SHORT" \
 	--arg built "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --argjson boards "$boards" \
-	'{release: $release, commit: $commit, gitid: $gitid, built: $built, boards: $boards}' \
+	'{release: $release, version: $version, prerelease: $prerelease, commit: $commit, gitid: $gitid, built: $built, boards: $boards}' \
 	> "$OUT/firmware.json"
 
 (cd "$OUT" && sha256sum -- *.bin firmware.json > SHA256SUMS)
 
 echo
+jq -r '"\(.release) (version \(.version), prerelease \(.prerelease)), GitID \(.gitid)"' "$OUT/firmware.json"
 jq -r '.boards[] | "\(.file)\t\(.board) \(.tcxo)MHz duplex=\(.duplex) \(.host)\t\(.sha256[0:12])"' "$OUT/firmware.json" | column -t -s $'\t'
