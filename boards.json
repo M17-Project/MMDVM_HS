@@ -1,0 +1,30 @@
+{
+  "_comment": [
+    "Which firmware image each hotspot board takes. scripts/release_build.sh builds one image per board (<id>.bin) from its config, and carries these entries into the release's firmware.json with what each image reports and how to flash it.",
+    "id: the board's name in Pi-Star (kept from Pi-Star 4's pistar-modemupgrade); aliases: other names for the same board and image.",
+    "gpio (boards on the Pi's serial port): the Raspberry Pi GPIO lines (BCM) on the STM32's BOOT0 and RESET pins, which put it into its serial bootloader; port: the serial port, where it is not the modem port Pi-Star already uses.",
+    "Every configs/*.h must be used by a board, so a config added upstream fails the build until it is mapped here."
+  ],
+  "boards": [
+    {"id": "hs_hat", "name": "MMDVM_HS_Hat (14.7456 MHz TCXO)", "config": "MMDVM_HS_Hat.h", "aliases": ["euronode"], "gpio": {"boot0": 20, "reset": 21}},
+    {"id": "hs_hat-12mhz", "name": "MMDVM_HS_Hat (12.288 MHz TCXO)", "config": "MMDVM_HS_Hat-12mhz.h", "gpio": {"boot0": 20, "reset": 21}},
+    {"id": "hs_dual_hat", "name": "MMDVM_HS_Dual_Hat (14.7456 MHz TCXO)", "config": "MMDVM_HS_Dual_Hat.h", "gpio": {"boot0": 20, "reset": 21}},
+    {"id": "hs_dual_hat-12mhz", "name": "MMDVM_HS_Dual_Hat (12.288 MHz TCXO)", "config": "MMDVM_HS_Dual_Hat-12mhz.h", "gpio": {"boot0": 20, "reset": 21}},
+    {"id": "zum_rpi", "name": "ZUMspot RPi", "config": "ZUMspot_RPi.h", "gpio": {"boot0": 20, "reset": 21}},
+    {"id": "zum_dualband", "name": "ZUMspot RPi dual band", "config": "ZUMspot_dualband.h", "gpio": {"boot0": 20, "reset": 21}},
+    {"id": "zum_rpi-duplex", "name": "ZUMspot RPi duplex", "config": "ZUMspot_duplex.h", "gpio": {"boot0": 20, "reset": 21}},
+    {"id": "zum_usb", "name": "ZUMspot USB stick", "config": "ZUMspot_USB.h"},
+    {"id": "zum_libre", "name": "ZUMspot Libre Kit", "config": "ZUMspot_Libre.h"},
+    {"id": "skybridge", "name": "SkyBridge (14.7456 MHz TCXO)", "config": "SkyBridge_RPi.h", "gpio": {"boot0": 20, "reset": 21}},
+    {"id": "nanodv_npi", "name": "NANO_DV NPi (BG4TGO)", "config": "NanoDV_NPI.h", "gpio": {"boot0": 20, "reset": 21}},
+    {"id": "nanodv_usb", "name": "NANO_DV USB (BG4TGO)", "config": "NanoDV_USB.h"},
+    {"id": "hs_hat_nano_hotspot", "name": "Nano_hotSPOT (BI7JTA, 14.7456 MHz TCXO)", "config": "Nano_hotSPOT.h", "gpio": {"boot0": 20, "reset": 21}},
+    {"id": "hs_hat_nano_hotspot-duplex", "name": "Nano_hotSPOT duplex (VR2VYE, 14.7456 MHz TCXO)", "config": "Nano_hotSPOT_duplex.h", "gpio": {"boot0": 20, "reset": 21}},
+    {"id": "hs_hat_lonestar-usb", "name": "LoneStar LS MMDVM USB (14.7456 MHz TCXO)", "config": "LoneStar_USB.h"},
+    {"id": "hs_hat_ambe", "name": "HS_HAT_AMBE (14.7456 MHz TCXO)", "config": "D2RG_MMDVM_HS.h", "gpio": {"boot0": 20, "reset": 21}},
+    {"id": "d2rg_mmdvm_hs", "name": "D2RG MMDVM_HS", "config": "D2RG_MMDVM_HS.h", "port": "/dev/ttySC0", "gpio": {"boot0": 23, "reset": 22}},
+    {"id": "hs_hat_generic", "name": "MMDVM_HS generic (14.7456 MHz TCXO)", "config": "generic_gpio.h", "gpio": {"boot0": 20, "reset": 21}},
+    {"id": "hs_hat_generic_duplex", "name": "MMDVM_HS generic duplex (14.7456 MHz TCXO)", "config": "generic_duplex_gpio.h", "gpio": {"boot0": 20, "reset": 21}},
+    {"id": "hs_hat_generic_duplex-usb", "name": "MMDVM_HS generic duplex USB (14.7456 MHz TCXO)", "config": "generic_duplex_usb.h"}
+  ]
+}

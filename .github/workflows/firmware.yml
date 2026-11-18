@@ -1,4 +1,4 @@
-# Builds the firmware for every board in configs/ on each push, and on a
+# Builds the firmware for every board in boards.json on each push, and on a
 # release tag (yyyy.mm.dd.rr) publishes the images, firmware.json (the
 # manifest Pi-Star upgrades from) and SHA256SUMS as a GitHub release.
 name: Firmware
@@ -63,5 +63,5 @@ jobs:
           gh release create "$TAG" -R "$GITHUB_REPOSITORY" --title "$TAG" \
             --notes "MMDVM_HS firmware for every board in configs/, built from ${gitid} (${desc#*-}).
 
-          Each board reports \`GitID #${gitid}\` in its version string. firmware.json lists every image with its board, TCXO, duplex, host link, flash method and SHA-256; SHA256SUMS covers the images and the manifest." \
-            -- *_fw.bin firmware.json SHA256SUMS
+          Each board reports \`GitID #${gitid}\` in its version string. firmware.json maps every board (by its Pi-Star id, from boards.json) to its image, with what it reports, TCXO, duplex, host link, flash method and SHA-256; SHA256SUMS covers the images and the manifest." \
+            -- *.bin firmware.json SHA256SUMS
