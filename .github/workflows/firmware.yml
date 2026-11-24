@@ -1,12 +1,13 @@
 # Builds the firmware for every board in boards.json on each push. A tag
-# of the firmware's version (version.h) publishes the images, firmware.json
-# (the manifest Pi-Star upgrades from) and SHA256SUMS as a GitHub release:
-# vX.Y.Z is a release, vX.Y.Z-<suffix> (-beta, -test, ...) a pre-release.
+# of the firmware's version (version.h) with -m17 publishes the images,
+# firmware.json (the manifest Pi-Star upgrades from) and SHA256SUMS as a
+# GitHub release: vX.Y.Z-m17[.<n>] is a release, vX.Y.Z-m17[.<n>].<label>.<n>
+# (.test.1, .beta.1) a pre-release. See scripts/release_build.sh.
 name: Firmware
 
 on:
   push:
-    branches: [master]
+    branches: [master, pistar]
     tags: ['v*']
   pull_request:
   workflow_dispatch:
@@ -67,7 +68,7 @@ jobs:
             kind=(--latest)
           fi
           gh release create "$TAG" -R "$GITHUB_REPOSITORY" --title "$TAG" "${kind[@]}" \
-            --notes "MMDVM_HS firmware for every board in configs/, built from ${gitid} (${desc#*-}).
+            --notes "MMDVM_HS firmware with M17 packet mode for every board in configs/, built from ${gitid} (${desc#*-}).
 
           Each board reports \`GitID #${gitid}\` in its version string. firmware.json maps every board (by its Pi-Star id, from boards.json) to its image, with what it reports, TCXO, duplex, host link, flash method and SHA-256; SHA256SUMS covers the images and the manifest." \
             -- *.bin firmware.json SHA256SUMS

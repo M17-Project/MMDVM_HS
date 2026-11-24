@@ -42,14 +42,18 @@ if [[ ! $VERSION =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
 fi
 PRERELEASE=true
 if [ -n "$TAG" ]; then
-	if [[ ! $TAG =~ ^${VERSION//./\\.}(-[A-Za-z0-9][A-Za-z0-9.]*)?$ ]]; then
-		echo "Tag $TAG does not match the firmware version $VERSION (version.h): use $VERSION or $VERSION-<suffix>" >&2
+	# The M17 Project's builds: vX.Y.Z-m17 (or -m17.<n>, a later M17
+	# release of the same version) is a release, and either followed by
+	# .<label>.<n> (vX.Y.Z-m17.test.1) a pre-release. Pi-Star only reads
+	# tags with one hyphen, so the label is joined with dots.
+	if [[ ! $TAG =~ ^${VERSION//./\\.}-m17(\.[0-9]+)?(\.[A-Za-z][A-Za-z0-9]*\.[0-9]+)?$ ]]; then
+		echo "Tag $TAG does not match the firmware version $VERSION (version.h): use $VERSION-m17[.<n>] for a release or $VERSION-m17[.<n>].<label>.<n> for a pre-release" >&2
 		exit 1
 	fi
-	[ "$TAG" = "$VERSION" ] && PRERELEASE=false
+	[ -z "${BASH_REMATCH[2]}" ] && PRERELEASE=false
 	RELEASE=$TAG
 else
-	RELEASE="$VERSION-g$SHORT"
+	RELEASE="$VERSION-m17.g$SHORT"
 fi
 
 if [ ! -d "$SRC/STM32F10X_Lib/CMSIS" ]; then
