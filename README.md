@@ -6,6 +6,8 @@
 [![Release date](https://img.shields.io/github/release-date-pre/MW0MWZ/MMDVM_HS?label=released)](https://github.com/MW0MWZ/MMDVM_HS/releases)
 [![Licence: GPL v2](https://img.shields.io/badge/licence-GPL%20v2-blue)](LICENCE)
 
+> **This is the M17 Project's `pistar` branch:** [MW0MWZ/MMDVM_HS](https://github.com/MW0MWZ/MMDVM_HS) `v1.6.2` with M17 packet mode (SMS from M17 radios) and a fix for the M17 TX preamble, both also offered upstream. Its releases are tagged `v1.6.2-m17` (`v1.6.2-m17.2` for a later M17 release of the same version, `v1.6.2-m17.test.1` for a pre-release), and the firmware reports `(M17)` after "FW by CA6JAU". To have Pi-Star update a hotspot's modem from here, set `repo=M17-Project/MMDVM_HS` under `[firmware]` in `/etc/pistar-mcp/pistar-mcp.ini`. The rest of this README is Andy's.
+
 This is Pi-Star's fork of [G4KLX's MMDVM_HS](https://github.com/g4klx/MMDVM_HS), with the later commits from [CA6JAU's repository](https://github.com/juribeparada/MMDVM_HS) merged in. It builds the firmware for every supported hotspot board on every push, and publishes each release with a manifest and checksums for Pi-Star to upgrade a hotspot's modem from. Fixes and features made here are offered back upstream.
 
 ## What this fork adds
