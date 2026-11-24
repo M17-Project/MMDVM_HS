@@ -226,13 +226,16 @@ void CSerialPort::getVersion()
 
   reply[3U] = PROTOCOL_VERSION;
 
+  // Copy no more than the reply holds: a long description (the longest
+  // board name, a build stamp instead of a GitID) plus the UDID can exceed it.
   uint8_t count = 4U;
-  for (uint8_t i = 0U; HARDWARE[i] != 0x00U; i++, count++)
+  for (uint8_t i = 0U; HARDWARE[i] != 0x00U && count < sizeof(reply); i++, count++)
     reply[count] = HARDWARE[i];
 
 #if defined(ENABLE_UDID)
-  reply[count++] = '\0';
-  for (uint8_t i = 0U; UDID[i] != 0x00U; i++, count++)
+  if (count < sizeof(reply))
+    reply[count++] = '\0';
+  for (uint8_t i = 0U; UDID[i] != 0x00U && count < sizeof(reply); i++, count++)
     reply[count] = UDID[i];
 #endif
 
